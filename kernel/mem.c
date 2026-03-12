@@ -66,8 +66,15 @@ vm_page_alloc(void)
   // available, and return 0 if it is not. For a hint of how the frame
   // table is structured, please see the "free_range" helper fucntion.
   // YOUR CODE HERE
+  
+  if (frame_table == 0) return 0; //if head pointer invalid => no frames available
 
-  return 0x00;
+
+  struct frame *f = frame_table; //saves the initial head pointer
+
+  frame_table = f->next; //moves head pointer to next available frame
+
+  return f; //return the first frame
 }
 
 
@@ -82,6 +89,11 @@ vm_page_free(void *pa)
   // table. The deallocated page should be come the first free frame
   // in the table.
   // YOUR CODE HERE
+  struct frame *old_head = frame_table; //save original head
+
+  frame_table = pa; //page pointer becomes new head
+
+  frame_table->next = old_head; //link the new head back into the list
 }
 
 
