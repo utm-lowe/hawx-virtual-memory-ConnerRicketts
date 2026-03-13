@@ -164,8 +164,18 @@ vm_page_insert(pagetable_t pagetable, uint64 va, uint64 pa, int perm)
     //       Ask yourself, how can this function fail without
     //       panicking?
     // YOUR CODE HERE
+    
+    uint64 rounded_va = PGROUNDDOWN(va);
 
-    return -1;
+    pte_t *pte = walk_pgtable(pagetable, rounded_va, 1);
+
+    if (*pte & PTE_V) {
+
+      panic("remap");
+
+    }
+
+    
 }
 
 
