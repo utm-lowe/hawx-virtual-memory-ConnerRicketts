@@ -168,12 +168,25 @@ vm_page_insert(pagetable_t pagetable, uint64 va, uint64 pa, int perm)
     uint64 rounded_va = PGROUNDDOWN(va);
 
     pte_t *pte = walk_pgtable(pagetable, rounded_va, 1);
+    
+    //walk_pgtable is unable to allocate
+    if (!pte) {
 
+      return -1;
+
+    }
+
+    //address already present, something valid is already in that pte slot
     if (*pte & PTE_V) {
 
       panic("remap");
 
     }
+     
+    //constructing the pte bitwise
+     *pte = PA2PTE(pa) | perm | PTE_V;
+
+     return 0;
 
     
 }
@@ -206,7 +219,21 @@ vm_map_range(pagetable_t pagetable, uint64 va, uint64 size, int perm)
     // We will allocate a new physical page frame for each page, and
     // then use vm_page_insert to add the page to the table.
     // YOUR CODE HERE
-    return -1;
+
+     uint64 rounded_va = PGROUNDDOWN(va);
+     uint64 end_of_range = PGROUNDDOWN((size + va));
+     uint64 pa;
+     
+     for (int i = rounded_va; i < end_of_range; i += PGSIZE) {
+
+       pa = (uint64)vm_page_alloc();
+       if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_oage_insert fails
+       if (pa == 0) return -1; //if pa NULL
+
+     }
+
+    
+    return 0;
 }
 
 
@@ -309,7 +336,23 @@ kernel_map_range(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int p
   // function is already set aside by the freerange for the use of the
   // kernel. This function will only be used at boot time.
   // YOUR CODE HERE
-  return -1;
+  
+     uint64 rounded_va = PGROUNDDOWN(va);
+     uint64 end_of_range = PGROUNDDOWN((size + va));
+     
+     
+     for (int i = rounded_va; i < end_of_range; i += PGSIZE) {
+
+       
+       if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_page_insert fails
+       pa += PGSIZE; //move to next page since it is already alloc
+
+     }
+
+    
+    return 0;
+
+  
 }
 
 
