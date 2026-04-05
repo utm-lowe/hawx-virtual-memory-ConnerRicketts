@@ -221,10 +221,10 @@ vm_map_range(pagetable_t pagetable, uint64 va, uint64 size, int perm)
     // YOUR CODE HERE
 
      uint64 rounded_va = PGROUNDDOWN(va);
-     uint64 end_of_range = PGROUNDDOWN((size + va));
+     uint64 end_of_range = PGROUNDUP(va + size);
      uint64 pa;
      
-     for (int i = rounded_va; i < end_of_range; i += PGSIZE) {
+     for (uint64 i = rounded_va; i < end_of_range; i += PGSIZE) {
 
        pa = (uint64)vm_page_alloc();
        if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_oage_insert fails
@@ -338,10 +338,10 @@ kernel_map_range(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int p
   // YOUR CODE HERE
   
      uint64 rounded_va = PGROUNDDOWN(va);
-     uint64 end_of_range = PGROUNDDOWN((size + va));
+     uint64 end_of_range = PGROUNDUP(va + size);
      
      
-     for (int i = rounded_va; i < end_of_range; i += PGSIZE) {
+     for (uint64 i = rounded_va; i < end_of_range; i += PGSIZE) {
 
        
        if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_page_insert fails
