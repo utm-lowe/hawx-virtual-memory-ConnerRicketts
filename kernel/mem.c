@@ -127,23 +127,23 @@ vm_lookup(pagetable_t pagetable, uint64 va)
   //       function in XV6. Take care when copying!
   // YOUR CODE HERE
 
-   pte_t *pte;
+  pte_t *pte;
   uint64 pa;
+  
 
   if(va >= MAXVA)
     return 0;
+  
+  
+  uint64 rounded_va = PGROUNDDOWN(va);
 
-  pte = walk_pgtable(pagetable, va, 0);
+  pte = walk_pgtable(pagetable, rounded_va, 0);
   if(pte == 0)
     return 0;
   if((*pte & PTE_V) == 0)
     return 0;
-  if((*pte & PTE_U) == 0)
-    return 0;
   pa = PTE2PA(*pte);
   return pa;
-
-  return 0;
 }
 
 
