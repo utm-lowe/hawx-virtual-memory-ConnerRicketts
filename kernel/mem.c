@@ -204,6 +204,23 @@ vm_page_remove(pagetable_t pagetable, uint64 va, uint64 npages, int do_free)
   // do_free is set to 1, this function should deallocate the
   // corresponding physical page frame.
   // YOUR CODE HERE
+  
+   for(uint64 a = va; a < va + npages*PGSIZE; a += PGSIZE){
+  pte_t *pte = walk_pgtable(pagetable, a, 0);
+  //pte not valid or page not present 
+  
+  if (pte == 0 || !(*pte & PTE_V)) {
+    panic("vm_page_remove"); 
+   }
+  
+   //get the physical page and dealloc
+   if (do_free == 1){ 
+
+      vm_page_free((void*)PTE2PA(*pte));
+
+   }
+     *pte = 0;
+  }
 }
 
 
@@ -227,7 +244,7 @@ vm_map_range(pagetable_t pagetable, uint64 va, uint64 size, int perm)
      for (uint64 i = rounded_va; i < end_of_range; i += PGSIZE) {
 
        pa = (uint64)vm_page_alloc();
-       if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_oage_insert fails
+       if (vm_page_insert(pagetable, i, pa, perm) < 0) return -1; // if vm_page_insert fails
        if (pa == 0) return -1; //if pa NULL
 
      }
